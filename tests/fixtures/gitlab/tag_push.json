@@ -1,0 +1,6 @@
+{
+  "object_kind": "tag_push",
+  "ref": "refs/tags/v1.2.3",
+  "user_username": "bob",
+  "project": {"id": 1, "path_with_namespace": "team/api", "web_url": "https://gitlab.example.com/team/api"}
+}

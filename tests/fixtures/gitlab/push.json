@@ -1,0 +1,12 @@
+{
+  "object_kind": "push",
+  "ref": "refs/heads/main",
+  "user_username": "alice",
+  "user_name": "Alice",
+  "project": {"id": 1, "path_with_namespace": "team/api", "web_url": "https://gitlab.example.com/team/api"},
+  "commits": [
+    {"id": "abc123", "message": "fix bug", "url": "https://gitlab.example.com/team/api/-/commit/abc123"},
+    {"id": "def456", "message": "add feature", "url": "https://gitlab.example.com/team/api/-/commit/def456"}
+  ],
+  "total_commits_count": 2
+}

@@ -1,0 +1,6 @@
+{
+  "object_kind": "pipeline",
+  "user": {"username": "alice"},
+  "project": {"id": 1, "path_with_namespace": "team/api", "web_url": "https://gitlab.example.com/team/api"},
+  "object_attributes": {"id": 4242, "ref": "main", "status": "failed"}
+}

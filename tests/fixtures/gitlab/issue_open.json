@@ -1,0 +1,6 @@
+{
+  "object_kind": "issue",
+  "user": {"username": "dave"},
+  "project": {"id": 1, "path_with_namespace": "team/api", "web_url": "https://gitlab.example.com/team/api"},
+  "object_attributes": {"iid": 11, "title": "Bug in login", "action": "open", "state": "opened", "url": "https://gitlab.example.com/team/api/-/issues/11"}
+}

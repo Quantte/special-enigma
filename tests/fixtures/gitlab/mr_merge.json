@@ -1,0 +1,10 @@
+{
+  "object_kind": "merge_request",
+  "user": {"username": "alice"},
+  "project": {"id": 1, "path_with_namespace": "team/api", "web_url": "https://gitlab.example.com/team/api"},
+  "object_attributes": {
+    "iid": 7, "title": "Add login flow", "action": "merge", "state": "merged",
+    "source_branch": "feature/login", "target_branch": "main",
+    "url": "https://gitlab.example.com/team/api/-/merge_requests/7"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "object_kind": "note",
+  "user": {"username": "carol"},
+  "project": {"id": 1, "path_with_namespace": "team/api", "web_url": "https://gitlab.example.com/team/api"},
+  "object_attributes": {"noteable_type": "MergeRequest", "note": "lgtm", "url": "https://gitlab.example.com/team/api/-/merge_requests/7#note_99"},
+  "merge_request": {"iid": 7, "title": "Add login flow"}
+}
