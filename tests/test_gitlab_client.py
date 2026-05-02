@@ -5,7 +5,7 @@ from gitlab_notifier.gitlab.client import GitLabClient
 
 async def test_get_project():
     def handler(request: httpx.Request) -> httpx.Response:
-        assert request.url.path == "/api/v4/projects/team%2Fapi"
+        assert request.url.raw_path == b"/api/v4/projects/team%2Fapi"
         assert request.headers["PRIVATE-TOKEN"] == "tok"
         return httpx.Response(200, json={"id": 7, "path_with_namespace": "team/api"})
 
