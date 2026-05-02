@@ -8,12 +8,11 @@ import httpx
 import uvicorn
 from telegram.ext import Application
 
-from gitlab_notifier.bot.admin import register_admin_handlers
-from gitlab_notifier.bot.handlers import register_user_handlers
+from gitlab_notifier.bot.handlers import register_handlers
 from gitlab_notifier.config import Settings
 from gitlab_notifier.db.session import make_engine, make_session_maker
-from gitlab_notifier.gitlab.client import GitLabClient
 from gitlab_notifier.notifier.dispatcher import dispatch
+from gitlab_notifier.security.crypto import TokenCipher
 from gitlab_notifier.webhook.server import build_app
 
 log = logging.getLogger(__name__)
@@ -30,17 +29,16 @@ async def main() -> None:
     session_maker = make_session_maker(engine)
 
     http = httpx.AsyncClient(base_url=settings.gitlab_base_url, timeout=10.0)
-    gitlab = GitLabClient(http, settings.gitlab_admin_token)
+    cipher = TokenCipher(settings.secret_key)
 
     tg_app: Application = Application.builder().token(settings.telegram_bot_token).build()
     tg_app.bot_data["session_maker"] = session_maker
-    tg_app.bot_data["admin_ids"] = set(settings.admin_telegram_ids)
-    tg_app.bot_data["gitlab"] = gitlab
+    tg_app.bot_data["http"] = http
+    tg_app.bot_data["cipher"] = cipher
     tg_app.bot_data["webhook_url"] = (
         f"{settings.webhook_public_url.rstrip('/')}/gitlab/webhook"
     )
-    register_user_handlers(tg_app)
-    register_admin_handlers(tg_app)
+    register_handlers(tg_app)
 
     fastapi_app = build_app(session_maker=session_maker, bot=tg_app.bot, dispatcher=dispatch)
     uv_config = uvicorn.Config(

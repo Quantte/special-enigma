@@ -1,18 +1,19 @@
-# GitLab Notifier
+# Nudge — GitLab Notifier
 
-Telegram bot that delivers webhook-driven notifications from a self-hosted GitLab to per-user subscribers.
+A Telegram bot that delivers webhook-driven notifications from a self-hosted GitLab. Each user signs in with their own GitLab personal access token and subscribes to the projects they have access to.
 
 ## Setup
 
 1. Create a Telegram bot via @BotFather. Save the token.
-2. Create a GitLab personal access token with the `api` scope.
-3. Find your Telegram user id (e.g. via @userinfobot).
-4. Copy `.env.example` to `.env` and fill in:
+2. Generate a Fernet key for token encryption:
+   ```bash
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+3. Copy `.env.example` to `.env` and fill in:
    - `TELEGRAM_BOT_TOKEN`
    - `GITLAB_BASE_URL` (e.g. `https://gitlab.example.com`)
-   - `GITLAB_ADMIN_TOKEN`
-   - `WEBHOOK_PUBLIC_URL` — the HTTPS URL GitLab will POST to (use a reverse proxy like Caddy/Traefik for TLS)
-   - `ADMIN_TELEGRAM_IDS` — comma-separated admin Telegram user IDs
+   - `WEBHOOK_PUBLIC_URL` — the HTTPS URL GitLab will POST to (put Caddy/Traefik in front for TLS)
+   - `SECRET_KEY` — the Fernet key generated above
    - `POSTGRES_PASSWORD` (compose only)
 
 ## Run
@@ -23,13 +24,23 @@ docker compose up -d --build
 
 ## Use
 
-- DM the bot `/start`.
-- Admin: `/addrepo group/project` to register a repo and auto-create the webhook.
-- Anyone: `/list` to see registered repos, `/subscribe group/project`, `/mine`, `/filter group/project push off`, `/unsubscribe group/project`.
+Each user runs through this flow on their own:
+
+1. DM the bot `/start`
+2. Create a GitLab personal access token (scope: `api`) at `<gitlab>/-/user_settings/personal_access_tokens`
+3. `/login <token>` — bot validates the token and stores it encrypted
+4. `/projects [search]` — pick projects from an inline keyboard. Tap to subscribe (✅) or unsubscribe (➕)
+5. `/mine` — list current subscriptions
+6. `/filter group/project <event> on|off` — toggle individual events
+7. `/logout` — wipe stored token (subscriptions remain; tokens needed to add new repos)
 
 ## Events
 
-Subscriptions cover: pushes, tag pushes, MR opened/updated/merged/approved, MR comments, issue opened/closed, pipeline failures.
+push, tag push, MR opened/updated/merged/approved, MR comments, issue opened/closed, pipeline failures.
+
+## Webhook ownership
+
+The first user to subscribe to a project causes the bot to create a webhook on that project using their token. Other users subscribing to the same project share the existing webhook — no duplicate hooks, no admin role needed.
 
 ## Migrations
 

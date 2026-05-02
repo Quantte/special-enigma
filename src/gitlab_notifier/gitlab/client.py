@@ -4,13 +4,43 @@ import httpx
 
 
 class GitLabClient:
+    """A GitLab API client bound to a single user's token."""
+
     def __init__(self, http: httpx.AsyncClient, token: str):
         self._http = http
         self._headers = {"PRIVATE-TOKEN": token}
 
+    async def get_current_user(self) -> dict:
+        r = await self._http.get("/api/v4/user", headers=self._headers)
+        r.raise_for_status()
+        return r.json()
+
     async def get_project(self, path_with_namespace: str) -> dict:
         encoded = quote(path_with_namespace, safe="")
         r = await self._http.get(f"/api/v4/projects/{encoded}", headers=self._headers)
+        r.raise_for_status()
+        return r.json()
+
+    async def get_project_by_id(self, project_id: int) -> dict:
+        r = await self._http.get(f"/api/v4/projects/{project_id}", headers=self._headers)
+        r.raise_for_status()
+        return r.json()
+
+    async def list_projects(
+        self, *, search: str | None = None, page: int = 1, per_page: int = 20
+    ) -> list[dict]:
+        params = {
+            "membership": "true",
+            "order_by": "last_activity_at",
+            "sort": "desc",
+            "page": str(page),
+            "per_page": str(per_page),
+        }
+        if search:
+            params["search"] = search
+        r = await self._http.get(
+            "/api/v4/projects", headers=self._headers, params=params
+        )
         r.raise_for_status()
         return r.json()
 
