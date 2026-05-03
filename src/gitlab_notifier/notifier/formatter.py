@@ -1,3 +1,4 @@
+from .events import EVENT_ICONS, EventKind
 from .notification import Notification
 
 _MD_SPECIALS = r"_*[]()~`>#+-=|{}.!\\"
@@ -13,17 +14,29 @@ def escape_md(text: str) -> str:
     return "".join(out)
 
 
+def _blockquote(text: str) -> str:
+    """MarkdownV2 blockquote: every line prefixed with > (escaped)."""
+    return "\n".join(f">{line}" for line in text.splitlines() if line)
+
+
 def format_notification(n: Notification) -> str:
+    icon = EVENT_ICONS.get(n.kind, "🔔")
     title = escape_md(n.title)
     repo = escape_md(n.repo_path)
     actor = escape_md(n.actor)
-    body = escape_md(n.body) if n.body else ""
-    url = n.url
-    parts = [
-        f"*{title}*",
-        f"📁 `{repo}`  👤 {actor}",
-    ]
-    if body:
-        parts.append(body)
-    parts.append(f"[open]({url})")
-    return "\n".join(parts)
+
+    sections: list[str] = []
+    sections.append(f"{icon} *{title}*")
+    sections.append(f"`{repo}` · {actor}")
+
+    if n.body:
+        if n.kind == EventKind.MR_COMMENT:
+            sections.append(_blockquote(escape_md(n.body)))
+        elif n.kind == EventKind.PUSH:
+            sections.append(escape_md(n.body))
+        else:
+            sections.append(escape_md(n.body))
+
+    sections.append(f"[Open in GitLab]({n.url})")
+
+    return "\n\n".join(sections)

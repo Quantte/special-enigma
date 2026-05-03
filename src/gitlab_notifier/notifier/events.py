@@ -37,3 +37,16 @@ EVENT_NAMES: dict[str, EventKind] = {
     "issue": EventKind.ISSUE,
     "tag": EventKind.TAG,
 }
+
+
+EVENT_ICONS: dict[EventKind, str] = {
+    EventKind.PUSH: "🚀",
+    EventKind.MR_OPEN: "🔀",
+    EventKind.MR_UPDATE: "✏️",
+    EventKind.MR_MERGE: "✅",
+    EventKind.MR_COMMENT: "💬",
+    EventKind.MR_APPROVAL: "👍",
+    EventKind.PIPELINE_FAIL: "🔥",
+    EventKind.ISSUE: "🐛",
+    EventKind.TAG: "🏷️",
+}

@@ -15,13 +15,17 @@ def parse_push(payload: dict) -> Notification:
     body_lines = []
     for c in payload.get("commits", [])[:5]:
         first = c["message"].splitlines()[0][:100]
-        body_lines.append(f"- {c['id'][:8]} {first}")
+        body_lines.append(f"• {c['id'][:8]} {first}")
+    extra = count - len(body_lines)
+    if extra > 0:
+        body_lines.append(f"…and {extra} more")
+    plural = "commit" if count == 1 else "commits"
     return Notification(
         kind=EventKind.PUSH,
         repo_path=path,
         gitlab_project_id=pid,
         actor=actor,
-        title=f"{count} commit(s) to {branch}",
+        title=f"{count} {plural} to {branch}",
         body="\n".join(body_lines),
         url=f"{web_url}/-/commits/{branch}",
     )
@@ -36,7 +40,7 @@ def parse_tag_push(payload: dict) -> Notification:
         repo_path=path,
         gitlab_project_id=pid,
         actor=actor,
-        title=f"tag {tag} pushed",
+        title=f"Tag {tag} pushed",
         body="",
         url=f"{web_url}/-/tags/{tag}",
     )
@@ -69,13 +73,16 @@ def parse_merge_request(payload: dict) -> Notification | None:
         EventKind.MR_MERGE: "merged",
         EventKind.MR_APPROVAL: "approved",
     }[kind]
+    body = title
+    if src and tgt:
+        body = f"{title}\n{src} → {tgt}"
     return Notification(
         kind=kind,
         repo_path=path,
         gitlab_project_id=pid,
         actor=actor,
-        title=f"MR !{iid} {verb}: {title}",
-        body=f"{src} → {tgt}" if src and tgt else "",
+        title=f"MR !{iid} {verb}",
+        body=body,
         url=attrs["url"],
     )
 
@@ -95,7 +102,7 @@ def parse_note(payload: dict) -> Notification | None:
         repo_path=path,
         gitlab_project_id=pid,
         actor=actor,
-        title=f"comment on MR !{iid}: {mr_title}",
+        title=f"Comment on MR !{iid} — {mr_title}",
         body=snippet,
         url=attrs["url"],
     )
@@ -114,7 +121,7 @@ def parse_pipeline(payload: dict) -> Notification | None:
         repo_path=path,
         gitlab_project_id=pid,
         actor=actor,
-        title=f"pipeline #{pipeline_id} failed on {ref}",
+        title=f"Pipeline #{pipeline_id} failed on {ref}",
         body="",
         url=f"{web_url}/-/pipelines/{pipeline_id}",
     )
@@ -134,8 +141,8 @@ def parse_issue(payload: dict) -> Notification | None:
         repo_path=path,
         gitlab_project_id=pid,
         actor=actor,
-        title=f"issue #{iid} {verb}: {attrs['title']}",
-        body="",
+        title=f"Issue #{iid} {verb}",
+        body=attrs["title"],
         url=attrs["url"],
     )
 

@@ -37,6 +37,7 @@ def test_parse_tag_push():
     assert n.kind == EventKind.TAG
     assert "v1.2.3" in n.title
     assert n.actor == "bob"
+    assert n.title.startswith("Tag")
 
 
 @pytest.mark.parametrize("name,kind", [
@@ -50,7 +51,8 @@ def test_parse_merge_request(name, kind):
     assert n is not None
     assert n.kind == kind
     assert n.repo_path == "team/api"
-    assert "!7" in n.title or "Add login flow" in n.title
+    assert "!7" in n.title
+    assert "Add login flow" in n.body
     assert n.url.endswith("/merge_requests/7")
 
 
@@ -75,6 +77,7 @@ def test_parse_pipeline_failed():
     n = parse_pipeline(_load("pipeline_failed.json"))
     assert n is not None and n.kind == EventKind.PIPELINE_FAIL
     assert "failed" in n.title.lower()
+    assert "#4242" in n.title
 
 
 def test_parse_pipeline_success_returns_none():
@@ -85,6 +88,7 @@ def test_parse_issue_open():
     n = parse_issue(_load("issue_open.json"))
     assert n is not None and n.kind == EventKind.ISSUE
     assert "#11" in n.title
+    assert "Bug in login" in n.body
 
 
 def test_dispatch_unknown_returns_none():
